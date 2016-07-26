@@ -161,41 +161,4 @@ df['OutcomeType_code'] = df.OutcomeType.map({"Adoption":0,"Died":1,"Euthanasia":
 end = datetime.datetime.now()
 print('time elapsed: ',str(end-start))
 
-print('convert to array,build logit model..')
-start = datetime.datetime.now()
 
-def arrayize(X):
-    xdf = [X.Named,X.AnimalType_code,X.Spayed,X.Sex,X.norm_breedscore,X.norm_colorscore,X.Mixed,X.norm_age,X.norm_outcomeyear,
-           X.norm_outcomeday,X.norm_outcometime]
-    xarray = np.array(xdf)
-    xarray = np.transpose(xarray)
-    return(xarray)
-
-X = arrayize(df)
-Y = np.array(df.OutcomeType_code)
-reg = LR()
-model = reg.fit(X,Y)
-
-end = datetime.datetime.now()
-print('time elapsed: ',str(end -start))
-
-print('now predicting from test set and writing to file..')
-start = datetime.datetime.now()
-
-dftest = pd.read_csv('./test.csv')
-dftest = getbreedandcolor(dftest)
-dftest = process(dftest)
-testX = arrayize(dftest)
-
-results = model.predict_proba(testX)
-probs = pd.DataFrame(dftest.ID)
-probs['Adoption'] = results[:,0]
-probs['Died']= results[:,1]
-probs['Euthanasia'] = results[:,2]
-probs['Return_to_owner']=results[:,3]
-probs['Transfer'] = results[:,4]
-with open("./7-5.csv",'w') as wfile:
-    probs.to_csv(wfile, index = False)
-wfile.close()
-end = datetime.datetime.now()
-print('time elapsed: ', str(end-start))
